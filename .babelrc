@@ -1,0 +1,10 @@
+{
+  "presets": [
+    "env",
+    "react"
+  ],
+  "plugins": [
+    "proposal-class-properties",
+    "proposal-object-rest-spread"
+  ]
+}
