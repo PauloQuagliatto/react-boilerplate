@@ -12,38 +12,54 @@ if (process.env.NODE_ENV === 'test') {
 
 module.exports = (env) => {
   const isProduction = env === 'production';
-  const CSSExtract = new MiniCssExtractPlugin('styles.css')
-
+  const CSSExtract = new MiniCssExtractPlugin({
+    filename: 'styles.css'
+  })
+  const isDev = isProduction ? 'production' : 'development'
+  
   return {
+    mode: isDev,
     entry: ['@babel/polyfill', './src/index.js'],
     output: {
-      path: path.join(__dirname, 'public', 'dist'),
+      path: path.resolve(__dirname, 'public', 'dist'),
       filename: 'bundle.js'
     },
     module: {
-      rules: [{
-        loader: 'babel-loader',
-        test: /\.js$/,
-        exclude: /node_modules/
-      }, {
-        test: /\.s?css$/,
-        use: CSSExtract.extract({
+      rules: [
+        {
+          test: /\.(js|jsx)$/,
+          exclude: /node_modules/,
+          use: {
+            loader: 'babel-loader'
+          }
+        },
+        {
+          test: [/\.s[ac]ss$/i, /\.css$/i],
           use: [
             {
+              loader: CSSExtract.loader,
+              options: {
+                sourceMap: true
+              }
+            }, {
+              loader: 'style-loader',
+              options: {
+                sourceMap: true
+              }
+            }, {
               loader: 'css-loader',
               options: {
                 sourceMap: true
               }
-            },
-            {
+            }, {
               loader: 'sass-loader',
               options: {
                 sourceMap: true
               }
             }
           ]
-        })
-      }]
+        }
+      ]
     },
     plugins: [
       CSSExtract,
@@ -56,6 +72,9 @@ module.exports = (env) => {
         'process.env.FIREBASE_MESSAGING_SENDER_ID': JSON.stringify(process.env.FIREBASE_MESSAGING_SENDER_ID)
       })
     ],
+    resolve: {
+      extensions: ['.js'],
+    },
     devtool: isProduction ? 'source-map' : 'inline-source-map',
     devServer: {
       contentBase: path.join(__dirname, 'public'),
